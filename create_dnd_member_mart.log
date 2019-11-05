@@ -1,0 +1,955 @@
+1                                                          The SAS System                               12:18 Tuesday, July 24, 2018
+
+NOTE: Unable to open SASUSER.PROFILE. WORK.PROFILE will be opened instead.
+NOTE: All profile changes will be lost at the end of the session.
+NOTE: Copyright (c) 2002-2010 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.3 (TS1M2) 
+      Licensed to LOYALTY SOLUTIONS & RESEARCH PRIVATE LIMITED, Site 11602563.
+NOTE: This session is executing on the Linux 2.6.32-696.20.1.el6.x86_64 (LIN X64) platform.
+
+
+
+NOTE: Enhanced analytical products:
+
+SAS/STAT 12.1, SAS/ETS 12.1, SAS/OR 12.2, SAS/IML 12.1
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           0.14 seconds
+      cpu time            0.02 seconds
+      
+1          %include "/sasdata/core_etl/prod/sas/includes/init_env.sas" /source2;
+NOTE: %INCLUDE (level 1) file /sasdata/core_etl/prod/sas/includes/init_env.sas is file 
+      /sasdata/core_etl/prod/sas/includes/init_env.sas.
+2         +/************************************************************************
+3         +*       Program      :  init_env.sas                                    *
+4         +*                                                                       *
+5         +*                                                                       *
+6         +*       Owner        : Analytics, LSRPL                                 *
+7         +*                                                                       *
+8         +*       Author       : Anantha Raman, LSRL-273                          *
+9         +*                                                                       *
+10        +*       Input        :                                                  *
+11        +*                                                                       *
+12        +*       Output       :                                                  *
+13        +*                                                                       *
+14        +*       Dependencies :                                                  *
+15        +*			Macros:                                         *
+16        +*		set_rpt_env                                             *
+17        +*                                                                       *
+18        +*       Description  : Initialization macro to setup the libraries,     *
+19        +*                      formats, ODS tagsets, etc.                       *
+20        +*                                                                       *
+21        +*       Usage        : As is or %INCLUDE                                *
+2                                                          The SAS System                               12:18 Tuesday, July 24, 2018
+
+22        +*                                                                       *
+23        +*                                                                       *
+24        +*                                                                       *
+25        +*                                                                       *
+26        +*       History      :                                                  *
+27        +*       (Analyst)     (Date)    (Changes)                               *
+28        +*       LSRL/273	16apr2013   Added admin sasautos to autocall list  *
+29        +*                               (C0001)                                 *
+30        +************************************************************************/
+31        +
+32        +
+33        +options MAUTOSOURCE SASAUTOS=(
+34        +					"/sasdata/core_etl/prod/FG/sasautos/reporting steps"
+35        +					"/sasdata/core_etl/prod/FG/sasautos"
+36        +					"/sasdata/core_etl/prod/sas/sasautos"
+37        +                                         /*C0001 */
+38        +				)
+39        +		obs=max
+40        +		fmtsearch=(formats)
+41        +		nomprint
+42        +		nomlogic
+43        +		nosymbolgen
+44        +;
+45        +
+46        +data _null_;
+47        +	call symput("rundate", put(today(), date9.));
+48        +run;
+
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+49        +
+50        +%include "/sasdata/core_etl/prod/sas/sasautos/set_rpt_env.sas" / source2;
+NOTE: %INCLUDE (level 2) file /sasdata/core_etl/prod/sas/sasautos/set_rpt_env.sas is file 
+      /sasdata/core_etl/prod/sas/sasautos/set_rpt_env.sas.
+51        +/************************************************************************
+52        +*       Program      : SET_RPT_ENV							            *
+53        +*                                                                       *
+54        +*       Owner        : Analytics, LSRPL                                 *
+55        +*                                                                       *
+56        +*       Author       : ANANTHA RAMAN                          			*
+57        +*                                                                       *
+58        +*       Input        :  NONE                         					*
+59        +*                                                                       *
+60        +*       Output       : PERFECT SAS ENVIRONMENT							*
+61        +*                                                                       *
+62        +*       Dependencies : NONE                                             *
+63        +*                                                                       *
+64        +*       Description  : This macro can be used to SET THE BASIC SAS ENV  *
+65        +*                      at eachh invocation of SAS Session  				*
+66        +*																		*
+67        +* 		Path		 :/sasdata/core_etl/prod/sas/sasautos/set_rpt_env.sas*
+68        +*																		*
+69        +*                                                                       *
+70        +*       Usage        : 													*
+71        +*                                                                       *
+3                                                          The SAS System                               12:18 Tuesday, July 24, 2018
+
+72        +*       History      :                                                  *
+73        +*   LSRL-273	13-Jul-2011	Created.                       				*
+74        +*   LSRL-273    04-dec-2012 Added step to create dwhnpg library     	*
+75        +*                           (C0001)                                     *
+76        +*   LSRL-273    26-JAN-2013 Moving physical_card_Type_id = 4 from   	*
+77        +*                           CARDED to NON-CARDED bucket in the format 	*
+78        +*							definition FORMATS.CARD_TYPE (C0002)		*
+79        +*   LSRL-273    24-feb-2013 Added step to create date cut-off macro 	*
+80        +*                   		variables (C0003)                           *
+81        +*	LSRL-324    28-mar-2013 Default compress of datasets has added		*
+82        +*							(C0004)										*
+83        +*	LSRL-324    03-apr-2013 included table or column info macro (C0005) *
+84        +*	LSRL-273    01-may-2013	Added a new format PID2LMID to capture 		*
+85        +*							loyalty_partner_id given the partner_id 	*
+86        +*							(C0006)										*
+87        +*   LSRL-273  16-sep-2013 Migrated to the UNIX environment. (C0007)     *
+88        +*   LSRL-273  17-sep-2013 Decoupled FORMAT creation code and restricted *
+89        +*                         it only for etl_adm user                      *
+90        +*   LSRL-273  19-sep-2013 Added SUMMLIB to list of preloaded libraries (C0008)*
+91        +*   LSRL-273  01-oct-2013 Moved the SAS formats pre-loaded library from *
+92        +*             core_etl to sasconf area to facilitate availability of the*
+93        +*		formats to all client tools and BI servers. (C0009)       		*
+94        +*	LSRL-324  26-Oct-2013 Creates the formats on conditional basis		*
+95        +*				1) if login user is ETL_ADM and if it is first run only *
+96        +*				2) System will wait for 2 mins if signal file created 	*
+97        +*					with in 2 minutes of signal file creation (C0010)	*
+98        +*   LSRL-273  05-dec-2013 Added library reference for AMX_STG(C0011)    *
+99        +*   LSRL-334  15APR2014 created formats in a common location 			*
+100       +*             for both servers 10.32.161.207 and 10.32.161.208 to check *
+101       +*			  the difference between the performance of servers (C0012)*
+102       +*   LSRL-273  Restoring the formats location so that BI process can access *
+103       +*             user defined formats (C0013)                              *
+104       +************************************************************************/
+105       +
+106       +options MAUTOSOURCE SASAUTOS=(
+107       +					"/sasdata/core_etl/prod/FG/sasautos/reporting steps"
+108       +					"/sasdata/core_etl/prod/FG/sasautos"
+109       +					"/sasdata/core_etl/prod/sas/sasautos"
+110       +                                         /*C0001 */
+111       +				);
+112       +
+113       +
+114       +%macro set_rpt_env;
+115       +
+116       +options compress=Char Reuse=yes; /* C0004 */
+117       +options mprint mlogic symbolgen fmtsearch=(formats);
+118       +
+119       +/* Date related macro variables to be available throughout the session */
+120       +data _null_;
+121       +	call symput("rundate", put(today(), date9.));
+122       +run;
+123       +
+124       +%put &rundate.;
+125       +
+126       +/* Earliest date to pick up data from */
+127       +%LET epoch=01JUL2010;
+128       +
+129       +/* Last months last working day */
+4                                                          The SAS System                               12:18 Tuesday, July 24, 2018
+
+130       +%LET START_DATE_LAST_MON = INTNX("MONTH", "&SYSDATE"D, -1, "B");
+131       +%LET END_DATE_LAST_MON = INTNX("MONTH", "&SYSDATE"D, -1, "E");
+132       +%LET START_DATE_CURR_MON = INTNX("MONTH", "&SYSDATE"D, -0, "B");
+133       +%LET END_DATE_CURR_MON = INTNX("MONTH", "&SYSDATE"D, -0, "E");
+134       +
+135       +/* SAS Native libraries */
+136       +/*libname CUBELIB "/sasdata/core_etl/prod/libraries/CUBELIB";*/
+137       +libname AUDITLIB "/sasdata/core_etl/prod/libraries/AUDITLIB/";
+138       +libname SASMART "/sasdata/core_etl/prod/libraries/SASMART";
+139       +libname SUPPLIB "/sasdata/core_etl/prod/libraries/SUPPLIB";
+140       +libname WHOUSE "/sasdata/core_etl/prod/libraries/WHOUSE";
+141       +libname TEMPLIB "/sasdata/core_etl/prod/libraries/TEMPLIB";
+142       +libname OPSLIB "/sasdata/core_etl/prod/libraries/OPSLIB";
+143       +libname ECOUPON "/sasdata/core_etl/prod/libraries/ECOUPON";
+144       +libname REPORT "/sasdata/bi/REPORT";
+145       +/* C0008 */
+146       +libname SUMMLIB "/sasdata/core_etl/prod/libraries/SUMMLIB";
+147       +libname CIMLIB "/sasdata/ci/CIMPLIB";
+148       +libname CAMPLIB "/sasdata/campaign/CAMPLIB";
+149       +libname DIDLIB "/sasdata1/did/DIDLIB";
+150       +libname DID_STG "/sasdata1/did/DID_STG";
+151       +
+152       +libname BI_STG "/sasdata1/bi/BI_STG";
+153       +libname BI_AUDIT "/sasdata1/bi/BI_AUDIT";
+154       +
+155       +/* C0011 */
+156       +LIBNAME AMX_STG "/sasdata1/amex/AMX_STG";
+157       +
+158       +
+159       +
+160       +/*
+161       +	20130917: Currently, core_etl admin (etl_adm user does not have write access to the following folder.
+162       +	Moving formats creation to a localized folder within core_etl area.
+163       +
+164       +*/
+165       +
+166       +
+167       +/* C0009 */
+168       +/*(C0012)*/
+169       +/*LIBNAME FORMATS "/sasdata/core_etl/prod/libraries/FORMATS_TMP"; */
+170       +LIBNAME FORMATS "/sasconf/serverconfig/Lev1/SASApp/SASEnvironment/SASFormats/";
+171       +/*LIBNAME FORMATS "/sasconf/serverconfig/Lev1/SASAnalytics/SASEnvironment/SASFormats/";*/
+172       +
+173       +
+174       +/* ORACLE libraries */
+175       +%include "/sasdata/core_etl/prod/sas/includes/set_conn_biu_dwh_rw.sas" / source2;
+176       +
+177       +
+178       +
+179       +/*C0010*/
+180       +/* Construction of standardized PB formats. Runs only if core_etl administrator invokes the SAS-session and file
+180      !+existence of formats_signal_DDMONYYYY.txt file*/
+181       +
+182       +	%IF %cmpres(%upcase(&sysuserid.))=%cmpres(ETL_ADM) %then
+183       +		%do; /* ----- Checks the existence of file -- FORMATS_SIGNAL_DDMONYYYY.txt -----*/
+184       +			%if %sysfunc(fileexist(/sasdata/core_etl/prod/conf/signals/formats_signal_&sysdate9..txt)) = 0 %then
+185       +				%do;
+186       +					/* ----- If file doesn't exist, create the file and run the formats creation ----- */
+5                                                          The SAS System                               12:18 Tuesday, July 24, 2018
+
+187       +				Data _null_;
+188       +				file "/sasdata/core_etl/prod/conf/signals/formats_signal_&sysdate9..txt";
+189       +				put "------------------";
+190       +				run;
+191       +				
+192       +				%create_pb_std_formats;
+193       +
+194       +				%end;
+195       +			%else
+196       +				%do;
+197       +					/* ----- If file exist, check the file creation time is 2 minutes before ----- */
+198       +					/* ----- If file creation time is less than 2 minutes, system will wait for 2 minutes ------ */
+199       +					filename stat pipe "ls -ltr /sasdata/core_etl/prod/conf/signals/formats_signal_&sysdate9..txt"	;			
+200       +
+201       +					data time;
+202       +					infile stat truncover;
+203       +					input var $200.;
+204       +					Cr_time1 = scan(var,8,'');
+205       +					cr_time  = ( scan(cr_time1,1,':')*60 ) + (scan(cr_time1,2,':')*1);
+206       +					curtime1 = put(timepart(datetime()),HHMM5.);
+207       +					a = scan(curtime1,1,':')*60;
+208       +					b = scan(curtime1,2,':')*1;
+209       +					curtime  = a + b;
+210       +					call symputx('Mac_crt_time',cr_time);
+211       +					call symputx('Mac_cur_time',curtime);
+212       +					run;
+213       +
+214       +					%put Creatime Time ----> &Mac_crt_time. -- Current Time ------>  &Mac_cur_time.;
+215       +
+216       +					%if %eval(&Mac_crt_time. + 2) > &Mac_cur_time. %then
+217       +						%do;
+218       +							Data _null_;
+219       +							a =sleep(120,1);
+220       +							run;
+221       +						%end;
+222       +
+223       +				%end;
+224       +			%end;
+225       +		%else
+226       +				%do;
+227       +					/* ----- If login user is not ETL_ADM and checking status file existence ----- */
+228       +					/* ----- If file exist, check the file creation time is 2 minutes before ----- */
+229       +					/* ----- If file creation time is less than 2 minutes, system will wait for 2 minutes ------ */
+230       +
+231       +					filename stat pipe "ls -ltr /sasdata/core_etl/prod/conf/signals/formats_signal_&sysdate9..txt"	;			
+232       +
+233       +					data time;
+234       +					infile stat truncover;
+235       +					input var $200.;
+236       +					Cr_time1 = scan(var,8,'');
+237       +					cr_time  = ( scan(cr_time1,1,':')*60 ) + (scan(cr_time1,2,':')*1);
+238       +					curtime1 = put(timepart(datetime()),HHMM5.);
+239       +					a = scan(curtime1,1,':')*60;
+240       +					b = scan(curtime1,2,':')*1;
+241       +					curtime  = a + b;
+242       +					call symputx('Mac_crt_time',cr_time);
+243       +					call symputx('Mac_cur_time',curtime);
+244       +					run;
+6                                                          The SAS System                               12:18 Tuesday, July 24, 2018
+
+245       +
+246       +					%put Creatime Time ----> &Mac_crt_time. -- Current Time ------>  &Mac_cur_time.;
+247       +
+248       +					%if %eval(&Mac_crt_time. + 2) > &Mac_cur_time. %then
+249       +						%do;
+250       +							Data _null_;
+251       +							a =sleep(120,1);
+252       +							run;
+253       +						%end;
+254       +
+255       +				%end;
+256       +
+257       +%mend set_rpt_env;
+258       +
+259       +
+NOTE: %INCLUDE (level 2) ending.
+NOTE: %INCLUDE (level 1) resuming.
+260       +%set_rpt_env;
+MPRINT(SET_RPT_ENV):   symbolgen fmtsearch=(formats);
+MPRINT(SET_RPT_ENV):   data _null_;
+MPRINT(SET_RPT_ENV):   call symput("rundate", put(today(), date9.));
+MPRINT(SET_RPT_ENV):   run;
+
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+MLOGIC(SET_RPT_ENV):  %PUT &rundate.
+SYMBOLGEN:  Macro variable RUNDATE resolves to 24JUL2018
+24JUL2018
+MLOGIC(SET_RPT_ENV):  %LET (variable name is EPOCH)
+MLOGIC(SET_RPT_ENV):  %LET (variable name is START_DATE_LAST_MON)
+SYMBOLGEN:  Macro variable SYSDATE resolves to 24JUL18
+MLOGIC(SET_RPT_ENV):  %LET (variable name is END_DATE_LAST_MON)
+SYMBOLGEN:  Macro variable SYSDATE resolves to 24JUL18
+MLOGIC(SET_RPT_ENV):  %LET (variable name is START_DATE_CURR_MON)
+SYMBOLGEN:  Macro variable SYSDATE resolves to 24JUL18
+MLOGIC(SET_RPT_ENV):  %LET (variable name is END_DATE_CURR_MON)
+SYMBOLGEN:  Macro variable SYSDATE resolves to 24JUL18
+MPRINT(SET_RPT_ENV):   libname AUDITLIB "/sasdata/core_etl/prod/libraries/AUDITLIB/";
+NOTE: Libref AUDITLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/AUDITLIB
+MPRINT(SET_RPT_ENV):   libname SASMART "/sasdata/core_etl/prod/libraries/SASMART";
+NOTE: Libref SASMART was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/SASMART
+MPRINT(SET_RPT_ENV):   libname SUPPLIB "/sasdata/core_etl/prod/libraries/SUPPLIB";
+NOTE: Libref SUPPLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/SUPPLIB
+MPRINT(SET_RPT_ENV):   libname WHOUSE "/sasdata/core_etl/prod/libraries/WHOUSE";
+NOTE: Libref WHOUSE was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/WHOUSE
+MPRINT(SET_RPT_ENV):   libname TEMPLIB "/sasdata/core_etl/prod/libraries/TEMPLIB";
+NOTE: Libref TEMPLIB was successfully assigned as follows: 
+7                                                          The SAS System                               12:18 Tuesday, July 24, 2018
+
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/TEMPLIB
+MPRINT(SET_RPT_ENV):   libname OPSLIB "/sasdata/core_etl/prod/libraries/OPSLIB";
+NOTE: Libref OPSLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/OPSLIB
+MPRINT(SET_RPT_ENV):   libname ECOUPON "/sasdata/core_etl/prod/libraries/ECOUPON";
+NOTE: Libref ECOUPON was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/ECOUPON
+MPRINT(SET_RPT_ENV):   libname REPORT "/sasdata/bi/REPORT";
+NOTE: Libref REPORT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/bi/REPORT
+MPRINT(SET_RPT_ENV):   libname SUMMLIB "/sasdata/core_etl/prod/libraries/SUMMLIB";
+NOTE: Libref SUMMLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/SUMMLIB
+MPRINT(SET_RPT_ENV):   libname CIMLIB "/sasdata/ci/CIMPLIB";
+NOTE: Libref CIMLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/ci/CIMPLIB
+MPRINT(SET_RPT_ENV):   libname CAMPLIB "/sasdata/campaign/CAMPLIB";
+NOTE: Library CAMPLIB does not exist.
+MPRINT(SET_RPT_ENV):   libname DIDLIB "/sasdata1/did/DIDLIB";
+NOTE: Libref DIDLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata1/did/DIDLIB
+MPRINT(SET_RPT_ENV):   libname DID_STG "/sasdata1/did/DID_STG";
+NOTE: Libref DID_STG was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata1/did/DID_STG
+MPRINT(SET_RPT_ENV):   libname BI_STG "/sasdata1/bi/BI_STG";
+NOTE: Libref BI_STG was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata1/bi/BI_STG
+MPRINT(SET_RPT_ENV):   libname BI_AUDIT "/sasdata1/bi/BI_AUDIT";
+NOTE: Libref BI_AUDIT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata1/bi/BI_AUDIT
+MPRINT(SET_RPT_ENV):   LIBNAME AMX_STG "/sasdata1/amex/AMX_STG";
+NOTE: Libref AMX_STG was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata1/amex/AMX_STG
+MPRINT(SET_RPT_ENV):   LIBNAME FORMATS "/sasconf/serverconfig/Lev1/SASApp/SASEnvironment/SASFormats/";
+NOTE: Libref FORMATS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasconf/serverconfig/Lev1/SASApp/SASEnvironment/SASFormats
+NOTE: %INCLUDE (level 2) file /sasdata/core_etl/prod/sas/includes/set_conn_biu_dwh_rw.sas is file 
+      /sasdata/core_etl/prod/sas/includes/set_conn_biu_dwh_rw.sas.
+261       +/************************************************************************
+262       +*       Program      : G:\sas\common\includes\set_conn_biu_dwh_rw.sas   *
+263       +*                                                                       *
+264       +*                                                                       *
+265       +*       Owner        : Analytics, LSRPL                                 *
+266       +*                                                                       *
+267       +*       Author       : LSRL/273                                         *
+268       +*                                                                       *
+8                                                          The SAS System                               12:18 Tuesday, July 24, 2018
+
+269       +*       Input        :                                                  *
+270       +*                                                                       *
+271       +*                                                                       *
+272       +*                                                                       *
+273       +*       Output       :                                                  *
+274       +*                                                                       *
+275       +*                                                                       *
+276       +*                                                                       *
+277       +*       Dependencies :                                                  *
+278       +*                                                                       *
+279       +*       Description  : Creates library references to ORACLE schema(s).  *
+280       +*                                                                       *
+281       +*                                                                       *
+282       +*       Usage        :                                                  *
+283       +*                                                                       *
+284       +*                                                                       *
+285       +*                                                                       *
+286       +*                                                                       *
+287       +*       History      :                                                  *
+288       +*       (Analyst)     (Date)    (Changes)                               *
+289       +*       LSRL/273    16MAY2013  Added libref creation for ECOUPON2       *
+290       +*                              (C0001)                                  *
+291       +*       LSRL/273    16-sep-2013 Module operational in UNIX environment. *
+292       +*                   Currently defined ORACLE libraries are:             *
+293       +*                   DWHLIB                                              *
+294       +*                   ECOUPON                                             *
+295       +*                   OFBIZLIB                                            *
+296       +*                   This would be replaced with Oracle connections as   *
+297       +*                   CMS implementation.                                 *
+298       +*  		LSRL/334    27MAY2014(C0002)											*
+299       +*                   Adding cmsdwh library to connect to cmsdwh          *
+300       +*                   CMSDWH                                              *
+301       +*                 														*
+302       +************************************************************************/
+303       +
+304       +/* C0003*/
+305       +/* LIBNAME dwhlib ORACLE  PATH=DWHFO  SCHEMA=dwh  USER=dwh  PASSWORD="manager" ; */
+306       +LIBNAME DWHLIB ORACLE  PATH=CMSDWH  SCHEMA=BIU_READ  USER=biu_read  PASSWORD=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ;
+MPRINT(SET_RPT_ENV):   LIBNAME DWHLIB ORACLE PATH=CMSDWH SCHEMA=BIU_READ USER=biu_read 
+PASSWORD="{SAS002}56AFFB0547A4A37417F8135F2EAD17C9" ;
+NOTE: Libref DWHLIB was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: CMSDWH
+307       +
+308       +/* LIBNAME starlib ORACLE  PATH=DWHFO  SCHEMA=star  USER=dwh  PASSWORD="manager" ;
+309       +LIBNAME worklib ORACLE  PATH=DWHFO  SCHEMA=work  USER=dwh  PASSWORD="manager" ; */
+310       +/*libname ofbizlib oracle user=dwh password=manager schema=OFBIZ path='DWHFO';*/
+311       +
+312       +/* Connect to E-couponing test server */
+313       +/*libname ecoulibt oracle USER=ecoupon password=payback path=PAYBACK;*/
+314       +/* Connect to E-couponing prod area in ORACLE */
+315       +/*libname ecoulibp oracle USER=dwh password=manager schema=ecoupon path=DWHFO;*/
+316       +
+317       +/* C0001 */
+318       +
+319       +/*LIBNAME ecoupon2 ORACLE  PATH=dwhfo  SCHEMA=ecoupon2  USER=ecoupon2
+319      !+PASSWORD="{sas002}30A3A7464DCD9CC727DA4AF75736010D" ;*/
+320       +/* libname assignment for npg schema - To capture redemptions */
+9                                                          The SAS System                               12:18 Tuesday, July 24, 2018
+
+321       +/*LIBNAME DWHNPG ORACLE  PATH=CMSDWH  SCHEMA=PAYBACK_NPG1  USER=PAYBACK_NPG1 PASSWORD="PAYBACK_NPG1" ;*/
+322       +LIBNAME DWHNPG ORACLE  PATH=CMSDWH  SCHEMA=CMSDWH  USER=payback_npg1 PASSWORD=XXXXXXXXXXXXXX ;
+MPRINT(SET_RPT_ENV):   LIBNAME DWHNPG ORACLE PATH=CMSDWH SCHEMA=CMSDWH USER=payback_npg1 PASSWORD="payback_npg1" ;
+NOTE: Libref DWHNPG was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: CMSDWH
+323       +
+324       +%macro connecttooracle;
+325       +connect to oracle as DWH (USER=biu_read  PASSWORD="{SAS002}56AFFB0547A4A37417F8135F2EAD17C9" path=CMSDWH
+325      !+preserve_comments buffsize=10000);
+326       +%mend;
+NOTE: %INCLUDE (level 2) ending.
+NOTE: %INCLUDE (level 1) resuming.
+MLOGIC(SET_RPT_ENV):  Beginning compilation of CMPRES using the autocall file /sasdata/core_etl/prod/sas/sasautos/cmpres.sas.
+MLOGIC(SET_RPT_ENV):  Ending compilation of CMPRES.
+MLOGIC(CMPRES):  Beginning execution.
+MLOGIC(CMPRES):  This macro was compiled from the autocall file /sasdata/core_etl/prod/sas/sasautos/cmpres.sas
+SYMBOLGEN:  Macro variable SYSUSERID resolves to etl_adm
+MLOGIC(CMPRES):  Parameter PARAM has value ETL_ADM
+SYMBOLGEN:  Macro variable PARAM resolves to ETL_ADM
+MLOGIC(CMPRES):  Ending execution.
+MLOGIC(CMPRES):  Beginning execution.
+MLOGIC(CMPRES):  This macro was compiled from the autocall file /sasdata/core_etl/prod/sas/sasautos/cmpres.sas
+MLOGIC(CMPRES):  Parameter PARAM has value ETL_ADM
+SYMBOLGEN:  Macro variable PARAM resolves to ETL_ADM
+MLOGIC(CMPRES):  Ending execution.
+MLOGIC(SET_RPT_ENV):  %IF condition %cmpres(%upcase(&sysuserid.))=%cmpres(ETL_ADM) is TRUE
+SYMBOLGEN:  Macro variable SYSDATE9 resolves to 24JUL2018
+MLOGIC(SET_RPT_ENV):  %IF condition %sysfunc(fileexist(/sasdata/core_etl/prod/conf/signals/formats_signal_&sysdate9..txt)) = 0 is 
+      FALSE
+SYMBOLGEN:  Macro variable SYSDATE9 resolves to 24JUL2018
+MPRINT(SET_RPT_ENV):   filename stat pipe "ls -ltr /sasdata/core_etl/prod/conf/signals/formats_signal_24JUL2018.txt" ;
+MPRINT(SET_RPT_ENV):   data time;
+MPRINT(SET_RPT_ENV):   infile stat truncover;
+MPRINT(SET_RPT_ENV):   input var $200.;
+MPRINT(SET_RPT_ENV):   Cr_time1 = scan(var,8,'');
+MPRINT(SET_RPT_ENV):   cr_time = ( scan(cr_time1,1,':')*60 ) + (scan(cr_time1,2,':')*1);
+MPRINT(SET_RPT_ENV):   curtime1 = put(timepart(datetime()),HHMM5.);
+MPRINT(SET_RPT_ENV):   a = scan(curtime1,1,':')*60;
+MPRINT(SET_RPT_ENV):   b = scan(curtime1,2,':')*1;
+MPRINT(SET_RPT_ENV):   curtime = a + b;
+MPRINT(SET_RPT_ENV):   call symputx('Mac_crt_time',cr_time);
+MPRINT(SET_RPT_ENV):   call symputx('Mac_cur_time',curtime);
+MPRINT(SET_RPT_ENV):   run;
+
+NOTE: Character values have been converted to numeric values at the places given by: (Line):(Column).
+      326:236   326:11    326:96    326:130   
+NOTE: The infile STAT is:
+      Pipe command="ls -ltr /sasdata/core_etl/prod/conf/signals/formats_signal_24JUL2018.txt"
+
+NOTE: 1 record was read from the infile STAT.
+      The minimum record length was 114.
+      The maximum record length was 114.
+NOTE: The data set WORK.TIME has 1 observations and 7 variables.
+NOTE: Compressing data set WORK.TIME decreased size by 0.00 percent. 
+      Compressed is 1 pages; un-compressed would require 1 pages.
+NOTE: DATA statement used (Total process time):
+      real time           0.07 seconds
+10                                                         The SAS System                               12:18 Tuesday, July 24, 2018
+
+      cpu time            0.00 seconds
+      
+
+MLOGIC(SET_RPT_ENV):  %PUT Creatime Time ----> &Mac_crt_time. -- Current Time ------>  &Mac_cur_time.
+SYMBOLGEN:  Macro variable MAC_CRT_TIME resolves to 181
+SYMBOLGEN:  Macro variable MAC_CUR_TIME resolves to 738
+Creatime Time ----> 181 -- Current Time ------>  738
+SYMBOLGEN:  Macro variable MAC_CRT_TIME resolves to 181
+SYMBOLGEN:  Macro variable MAC_CUR_TIME resolves to 738
+MLOGIC(SET_RPT_ENV):  %IF condition %eval(&Mac_crt_time. + 2) > &Mac_cur_time. is FALSE
+MLOGIC(SET_RPT_ENV):  Ending execution.
+327       +
+328       +
+329       +
+330       +LIBNAME cmsdwh ORACLE  PATH=cmsdwh  SCHEMA=cmsdwh  USER=cmsdwh  PASSWORD=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ;
+NOTE: Libref CMSDWH was successfully assigned as follows: 
+      Engine:        ORACLE 
+      Physical Name: cmsdwh
+331       +libname cm '/sasdata/core_etl/prod/libraries/CAMPLIB';
+NOTE: Libref CM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/CAMPLIB
+332       +
+NOTE: %INCLUDE (level 1) ending.
+333        libname dq "/sasdata/core_etl/sudhakar/Test";
+NOTE: Libref DQ was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/sudhakar/Test
+334        libname etl_new "/sasdata/core_etl/prod/libraries/WIPMART";
+NOTE: Libref ETL_NEW was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /sasdata/core_etl/prod/libraries/WIPMART
+335        
+336        PROC DATASETS LIBRARY = WHOUSE NOLIST;
+337        	DELETE
+338        		YY_DND_MEMBER
+339        	;
+340        	
+NOTE: The file WHOUSE.YY_DND_MEMBER (memtype=DATA) was not found, but appears on a DELETE statement.
+340      !  MODIFY
+341        		DND_MEMBER
+342        	;
+NOTE: MODIFY was successful for WHOUSE.DND_MEMBER.DATA.
+343        	CHANGE
+344        		DND_MEMBER = YY_DND_MEMBER
+345        	;
+346        QUIT;
+
+NOTE: Changing the name WHOUSE.DND_MEMBER to WHOUSE.YY_DND_MEMBER (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.15 seconds
+      cpu time            0.02 seconds
+      
+
+347        
+348        proc sql noprint;
+349               select distinct sourced_association_id into: excl_sidlist separated by ","
+350                      from dwhlib.sid2partner
+11                                                         The SAS System                               12:18 Tuesday, July 24, 2018
+
+351                      where upcase(strip(exclude)) = "EXCLUDE";
+352        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.16 seconds
+      cpu time            0.00 seconds
+      
+
+SYMBOLGEN:  Macro variable EXCL_SIDLIST resolves to 
+            51,54,57,78,83,87,100,138,59,116,120,121,128,134,144,147,86,88,108,132,141,24,53,81,94,117,137,143,37,48,61,63,69,52,56,
+            101,140,49,58,64,105,115,145,146,62,79,82,98,118,126,139
+353        %PUT Default exclusion list of sourced_association_ids: &excl_sidlist.;
+Default exclusion list of sourced_association_ids: 
+51,54,57,78,83,87,100,138,59,116,120,121,128,134,144,147,86,88,108,132,141,24,53,81,94,117,137,143,37,48,61,63,69,52,56,101,140,49,5
+8,64,105,115,145,146,62,79,82,98,118,126,139
+354        
+355        PROC SQL;
+356        CREATE TABLE WHOUSE.DND_MEMBER_1 AS
+357               SELECT A.*, B.BAD_MOBILE_FLAG, B.dq_mobile_phone
+358                      FROM WHOUSE.MEMBER A
+359                      INNER JOIN etl_new.member_mart B
+360                      ON A.MEMBER_ID=B.MEMBER_ID
+361                      WHERE B.BAD_MOBILE_FLAG="NDNC" and a.is_deleted=0 ;
+NOTE: Compressing data set WHOUSE.DND_MEMBER_1 decreased size by 69.95 percent. 
+      Compressed is 182621 pages; un-compressed would require 607721 pages.
+NOTE: Table WHOUSE.DND_MEMBER_1 created, with 27347424 rows and 66 columns.
+
+362        /*AND A.SOURCED_ASSOCIATION_ID NOT IN  (&excl_sidlist.);*/
+363        QUIT;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           9:28:12.90
+      cpu time            40:52.26
+      
+
+364        
+365        
+366        data dd;
+367        set WHOUSE.DND_MEMBER_1;
+368        if length(dq_mobile_phone)=10 then cured_mobile1=cats("91",dq_mobile_phone);
+369        else cured_mobile1=dq_mobile_phone;
+370        if SOURCED_ASSOCIATION_ID IN  (&excl_sidlist.) then B2E_FLAG=1; else B2E_FLAG=0;
+SYMBOLGEN:  Macro variable EXCL_SIDLIST resolves to 
+            51,54,57,78,83,87,100,138,59,116,120,121,128,134,144,147,86,88,108,132,141,24,53,81,94,117,137,143,37,48,61,63,69,52,56,
+            101,140,49,58,64,105,115,145,146,62,79,82,98,118,126,139
+371        run;
+
+NOTE: There were 27347424 observations read from the data set WHOUSE.DND_MEMBER_1.
+NOTE: The data set WORK.DD has 27347424 observations and 68 variables.
+NOTE: Compressing data set WORK.DD decreased size by 73.23 percent. 
+      Compressed is 166413 pages; un-compressed would require 621533 pages.
+NOTE: DATA statement used (Total process time):
+      real time           2:21.30
+      cpu time            2:11.56
+      
+
+372        
+373        
+374        data WHOUSE.DND_MEMBER;
+375        set dd(drop=dq_mobile_phone);
+12                                                         The SAS System                               12:18 Tuesday, July 24, 2018
+
+376        where length(cured_mobile1)=12 and substr(cured_mobile1,1,3) not in("910","911","912","913","914","915");
+377        /*if length(cured_mobile1)=12 then output;*/
+378        /*else delete;*/
+379        rename cured_mobile1=dq_mobile_phone;
+380        run;
+
+NOTE: There were 27346833 observations read from the data set WORK.DD.
+      WHERE (LENGTH(cured_mobile1)=12) and SUBSTR(cured_mobile1, 1, 3) not in ('910', '911', '912', '913', '914', '915');
+NOTE: The data set WHOUSE.DND_MEMBER has 27346833 observations and 67 variables.
+NOTE: Compressing data set WHOUSE.DND_MEMBER decreased size by 73.51 percent. 
+      Compressed is 160973 pages; un-compressed would require 607708 pages.
+NOTE: DATA statement used (Total process time):
+      real time           2:13.62
+      cpu time            2:08.82
+      
+
+381        
+382        
+383        %include "/sasdata/core_etl/prod/sas/sasautos/send_mail.sas" / source2;
+NOTE: %INCLUDE (level 1) file /sasdata/core_etl/prod/sas/sasautos/send_mail.sas is file 
+      /sasdata/core_etl/prod/sas/sasautos/send_mail.sas.
+384       +/************************************************************************************
+385       +*       Program      : Generate_email.sas											*
+386       +*		Owner        : Analytics, LSRPL                                 			*
+387       +*                                                                       			*
+388       +*       Author       : core_tel/PAYBACK                                   			*
+389       +*                                                                       			*
+390       +*       Input        : TO= AND SUBJECT= are mandatory			        			*
+391       +*                      CC=, ATTACH=, BODY=write the body of email where each line   *
+392       +*					   is separated by | as a delimiter 							*
+393       +*																					*
+394       +*		Eg:																			*
+395       +*																					*
+396       +*-1)%send_email(TO=abc@payback.net, SUBJECT= Bonus Points );   						*
+397       +*																					*
+398       +*-2)%send_email(TO=abc@payback.net bcd@payback.net, SUBJECT= Bonus Points );   		*
+399       +*																					*	
+400       +*-3)%send_email(TO=abc@payback.net bcd@payback.net, SUBJECT= Bonus Points, 			*
+401       +*				   CC=cde@payback.net def@payback.net );   							*
+402       +*																					*
+403       +*-4)%send_email(TO=abc@payback.net bcd@payback.net, SUBJECT= Bonus Points,		 	*
+404       +*				   CC=cde@payback.net def@payback.net, ATTACH=G:\sas\bonus.xls,		*	
+405       +*				   BODY1 = %str(Hi All,| Data for the specific report is			*
+406       +*					placed at path:|enter the path of the data |					*
+407       +*					Many Thanks.);													*
+408       +*       Output       : Sends mail with given details                    			*
+409       +*                                                                       			*
+410       +*                                                                       			*
+411       +* Dependencies : /sasdata/core_etl/prod/sas/sasautos/Notifications_email_creds.sas	*
+412       +*                                                                       			*
+413       +* Description  : Sends mail with the given details                					*
+414       +*																					*
+415       +* Usage        : used to automated the processes with email notification			*
+416       +*                                                                       			*
+417       +*                                                                       			*
+418       +* History      :                                                  					*
+419       +* (Analyst)     	(Date)    	(Changes)                               			*
+420       +*                                                        							*
+13                                                         The SAS System                               12:18 Tuesday, July 24, 2018
+
+421       +************************************************************************************/
+422       +
+423       +
+424       +%macro send_mail(
+425       +	to_list=
+426       +	, cc_list=
+427       +	, sub=
+428       +	, attachment=
+429       +	, body=
+430       +);
+431       +
+432       +%include "/sasdata/core_etl/prod/sas/sasautos/Notifications_email_creds.sas" /source2;
+433       +
+434       +filename mailfile email
+435       +	%if %str(&to_list.) ~= %str() %then %do;
+436       +		to=(&to_list.)
+437       +	%end;
+438       +
+439       +	%if %str(&cc_list.) ~= %str() %then %do;
+440       +		cc=(&cc_list.)
+441       +	%end;
+442       +
+443       +	%if %str(&attachment.) ~= %str() %then %do;
+444       +		attach=(&attachment.)
+445       +	%end;
+446       +	subject="&sub."
+447       +;
+448       +
+449       +%put &body.;
+450       +
+451       +data _null_;
+452       +	file mailfile;
+453       +	format message_line $100.;
+454       +
+455       +		%let cnt = %eval(%length(&body.) - %length(%sysfunc(compress(&body.,|))) +1);
+456       +		%put --------------- &cnt.;
+457       +
+458       +		%do z = 1 %to &cnt.;
+459       +			%let line=%scan(&body.,&z.,%str(|));
+460       +			message_line="&line.";
+461       +			%if &z.=1 %then %do;
+462       +				put message_line;
+463       +				put;
+464       +			%end;
+465       +			%else %do;
+466       +				put @15 message_line;
+467       +			%end;
+468       +			put;
+469       +		%end;
+470       +	put ;
+471       +	put ;
+472       +	put "Data Innovation & Delivery,";
+473       +	Put "Business Intelligence Unit,";
+474       +	put "Loyalty Solutions and Research Private Limited";
+475       +run;
+476       +%mend send_mail;
+NOTE: %INCLUDE (level 1) ending.
+477        
+14                                                         The SAS System                               12:18 Tuesday, July 24, 2018
+
+478              %send_mail(
+MLOGIC(SEND_MAIL):  Beginning execution.
+479        	  to_list=%str('dharmendrasinh.chavda@payback.in''sudhakar.srinivas@payback.in')
+480        	, cc_list=%str('prashanth.reddy@payback.in' 'ramachandra.u_ext@payback.in')
+481            , sub=%str(Sucessfully completed Whouse.DND_MEMBER)
+482            , body=%str(Dear Team,|Whouse.DND_MEMBER File created is Created Sucessfully.|
+483        			-Thank You,|
+484        			Sudhakar S.)
+485        	);
+MLOGIC(SEND_MAIL):  Parameter TO_LIST has value 'dharmendrasinh.chavda@payback.in''sudhakar.srinivas@payback.in'
+MLOGIC(SEND_MAIL):  Parameter CC_LIST has value 'prashanth.reddy@payback.in' 'ramachandra.u_ext@payback.in'
+MLOGIC(SEND_MAIL):  Parameter SUB has value Sucessfully completed Whouse.DND_MEMBER
+MLOGIC(SEND_MAIL):  Parameter BODY has value Dear TeamWhouse.DND_MEMBER File created is Created Sucessfully.    Thank You    
+      Sudhakar S.
+MLOGIC(SEND_MAIL):  Parameter ATTACHMENT has value 
+NOTE: %INCLUDE (level 1) file /sasdata/core_etl/prod/sas/sasautos/Notifications_email_creds.sas is file 
+      /sasdata/core_etl/prod/sas/sasautos/Notifications_email_creds.sas.
+486       +/************************************************************************************
+487       +*       Program      : Notifications_email_creds.sas								*
+488       +*		Owner        : Analytics, LSRPL                                 			*
+489       +*                                                                       			*
+490       +*       Author       : LSRL/324                                            			*
+491       +*                                                                       			*
+492       +*       Input        : No Input														*																					*
+493       +*																					*
+494       +*																					*
+495       +*																					*
+496       +*       Output       : Enables you to send mail FROM as notifications@payback.in	*
+497       +*                                                                       			*
+498       +*                                                                       			*
+499       +*       Dependencies : None															*
+500       +*                                                                       			*
+501       +*       Description  :                 												*
+502       +*																					*
+503       +*       Usage        : Can be used to send mail from SAS(FROM as notifications@payback.in) *
+504       +*                                                                       			*
+505       +*       History      :                                                  			*
+506       +*       (Analyst)     	(Date)    	(Changes)                               		*
+507       +*                                                                       			*
+508       +*        LSRL/324		01Oct2012	Created                                         *
+509       +************************************************************************************/
+510       +
+511       +	options emailsys=smtp  emailhost=inblrpoc02.lsrpl.local emailport=25 ;
+MPRINT(SEND_MAIL):   options emailsys=smtp emailhost=inblrpoc02.lsrpl.local emailport=25 ;
+512       +	options emailID = "notifications@payback.in";
+MPRINT(SEND_MAIL):   options emailID = "notifications@payback.in";
+513       +	options EMAILAUTHPROTOCOL=NONE;
+MPRINT(SEND_MAIL):   options EMAILAUTHPROTOCOL=NONE;
+514       +	options emailpw= XXXXXXXXXX;
+MPRINT(SEND_MAIL):   options emailpw= '123456Nn';
+515       +
+NOTE: %INCLUDE (level 1) ending.
+SYMBOLGEN:  Macro variable TO_LIST resolves to 'dharmendrasinh.chavda@payback.in''sudhakar.srinivas@payback.in'
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+MLOGIC(SEND_MAIL):  %IF condition &to_list. ~=  is TRUE
+SYMBOLGEN:  Macro variable TO_LIST resolves to 'dharmendrasinh.chavda@payback.in''sudhakar.srinivas@payback.in'
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+SYMBOLGEN:  Macro variable CC_LIST resolves to 'prashanth.reddy@payback.in' 'ramachandra.u_ext@payback.in'
+15                                                         The SAS System                               12:18 Tuesday, July 24, 2018
+
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+MLOGIC(SEND_MAIL):  %IF condition &cc_list. ~=  is TRUE
+SYMBOLGEN:  Macro variable CC_LIST resolves to 'prashanth.reddy@payback.in' 'ramachandra.u_ext@payback.in'
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+SYMBOLGEN:  Macro variable ATTACHMENT resolves to 
+MLOGIC(SEND_MAIL):  %IF condition &attachment. ~=  is FALSE
+SYMBOLGEN:  Macro variable SUB resolves to Sucessfully completed Whouse.DND_MEMBER
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+MPRINT(SEND_MAIL):   filename mailfile email to=('dharmendrasinh.chavda@payback.in''sudhakar.srinivas@payback.in') 
+cc=('prashanth.reddy@payback.in' 'ramachandra.u_ext@payback.in') subject="Sucessfully completed Whouse.DND_MEMBER" ;
+MLOGIC(SEND_MAIL):  %PUT &body.
+SYMBOLGEN:  Macro variable BODY resolves to Dear Team,|Whouse.DND_MEMBER File created is Created Sucessfully.|    -Thank You,|    
+            Sudhakar S.
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+Dear Team,|Whouse.DND_MEMBER File created is Created Sucessfully.|    -Thank You,|    Sudhakar S.
+MPRINT(SEND_MAIL):   data _null_;
+MPRINT(SEND_MAIL):   file mailfile;
+MPRINT(SEND_MAIL):   format message_line $100.;
+MLOGIC(SEND_MAIL):  %LET (variable name is CNT)
+SYMBOLGEN:  Macro variable BODY resolves to Dear Team,|Whouse.DND_MEMBER File created is Created Sucessfully.|    -Thank You,|    
+            Sudhakar S.
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+SYMBOLGEN:  Macro variable BODY resolves to Dear Team,|Whouse.DND_MEMBER File created is Created Sucessfully.|    -Thank You,|    
+            Sudhakar S.
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+MLOGIC(SEND_MAIL):  %PUT --------------- &cnt.
+SYMBOLGEN:  Macro variable CNT resolves to 4
+--------------- 4
+SYMBOLGEN:  Macro variable CNT resolves to 4
+MLOGIC(SEND_MAIL):  %DO loop beginning; index variable Z; start value is 1; stop value is 4; by value is 1.  
+MLOGIC(SEND_MAIL):  %LET (variable name is LINE)
+SYMBOLGEN:  Macro variable BODY resolves to Dear Team,|Whouse.DND_MEMBER File created is Created Sucessfully.|    -Thank You,|    
+            Sudhakar S.
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+SYMBOLGEN:  Macro variable Z resolves to 1
+SYMBOLGEN:  Macro variable LINE resolves to Dear Team,
+MPRINT(SEND_MAIL):   message_line="Dear Team,";
+SYMBOLGEN:  Macro variable Z resolves to 1
+MLOGIC(SEND_MAIL):  %IF condition &z.=1 is TRUE
+MPRINT(SEND_MAIL):   put message_line;
+MPRINT(SEND_MAIL):   put;
+MPRINT(SEND_MAIL):   put;
+MLOGIC(SEND_MAIL):  %DO loop index variable Z is now 2; loop will iterate again.
+MLOGIC(SEND_MAIL):  %LET (variable name is LINE)
+SYMBOLGEN:  Macro variable BODY resolves to Dear Team,|Whouse.DND_MEMBER File created is Created Sucessfully.|    -Thank You,|    
+            Sudhakar S.
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+SYMBOLGEN:  Macro variable Z resolves to 2
+SYMBOLGEN:  Macro variable LINE resolves to Whouse.DND_MEMBER File created is Created Sucessfully.
+MPRINT(SEND_MAIL):   message_line="Whouse.DND_MEMBER File created is Created Sucessfully.";
+SYMBOLGEN:  Macro variable Z resolves to 2
+MLOGIC(SEND_MAIL):  %IF condition &z.=1 is FALSE
+MPRINT(SEND_MAIL):   put @15 message_line;
+MPRINT(SEND_MAIL):   put;
+MLOGIC(SEND_MAIL):  %DO loop index variable Z is now 3; loop will iterate again.
+MLOGIC(SEND_MAIL):  %LET (variable name is LINE)
+SYMBOLGEN:  Macro variable BODY resolves to Dear Team,|Whouse.DND_MEMBER File created is Created Sucessfully.|    -Thank You,|    
+            Sudhakar S.
+16                                                         The SAS System                               12:18 Tuesday, July 24, 2018
+
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+SYMBOLGEN:  Macro variable Z resolves to 3
+SYMBOLGEN:  Macro variable LINE resolves to -Thank You,
+MPRINT(SEND_MAIL):   message_line="-Thank You,";
+SYMBOLGEN:  Macro variable Z resolves to 3
+MLOGIC(SEND_MAIL):  %IF condition &z.=1 is FALSE
+MPRINT(SEND_MAIL):   put @15 message_line;
+MPRINT(SEND_MAIL):   put;
+MLOGIC(SEND_MAIL):  %DO loop index variable Z is now 4; loop will iterate again.
+MLOGIC(SEND_MAIL):  %LET (variable name is LINE)
+SYMBOLGEN:  Macro variable BODY resolves to Dear Team,|Whouse.DND_MEMBER File created is Created Sucessfully.|    -Thank You,|    
+            Sudhakar S.
+SYMBOLGEN:  Some characters in the above value which were subject to macro quoting have been unquoted for printing.
+SYMBOLGEN:  Macro variable Z resolves to 4
+SYMBOLGEN:  Macro variable LINE resolves to Sudhakar S.
+MPRINT(SEND_MAIL):   message_line="Sudhakar S.";
+SYMBOLGEN:  Macro variable Z resolves to 4
+MLOGIC(SEND_MAIL):  %IF condition &z.=1 is FALSE
+MPRINT(SEND_MAIL):   put @15 message_line;
+MPRINT(SEND_MAIL):   put;
+MLOGIC(SEND_MAIL):  %DO loop index variable Z is now 5; loop will not iterate again.
+MPRINT(SEND_MAIL):   put ;
+MPRINT(SEND_MAIL):   put ;
+MPRINT(SEND_MAIL):   put "Data Innovation & Delivery,";
+MPRINT(SEND_MAIL):   Put "Business Intelligence Unit,";
+MPRINT(SEND_MAIL):   put "Loyalty Solutions and Research Private Limited";
+MPRINT(SEND_MAIL):   run;
+
+NOTE: The file MAILFILE is:
+      E-Mail Access Device
+
+Message sent
+      To:          'dharmendrasinh.chavda@payback.in''sudhakar.srinivas@payback.in'
+      Cc:          'prashanth.reddy@payback.in' 'ramachandra.u_ext@payback.in'
+      Bcc:         
+      Subject:     Sucessfully completed Whouse.DND_MEMBER
+      Attachments: 
+NOTE: 14 records were written to the file MAILFILE.
+      The minimum record length was 0.
+      The maximum record length was 68.
+NOTE: DATA statement used (Total process time):
+      real time           0.50 seconds
+      cpu time            0.01 seconds
+      
+
+MLOGIC(SEND_MAIL):  Ending execution.
+516        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           9:32:50.02
+      cpu time            45:12.75
+      

@@ -10,8 +10,6 @@ contain macros for mailing:
 
 4.Error Checking
 
-5. Error Creationg
-
-6. Geotagging
+5.Geotagging
 
 

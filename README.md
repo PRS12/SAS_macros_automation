@@ -12,4 +12,10 @@ contain macros for mailing:
 
 5.Geotagging
 
+6.Perl Execution of code
+
+7.Error handling via Perl
+
+8.Directory cleanup
+
 
